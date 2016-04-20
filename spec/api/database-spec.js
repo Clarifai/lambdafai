@@ -76,6 +76,38 @@ describe('Database', function() {
       expect(err.message).toBe('Fail');
     });
   });
+  
+  describe('#listByIndex', function() {
+    it('lists items', function() {
+      db.table('T').listByIndex({Key: {id: 'someId'}, IndexName: 'SomeIndex'}, capture);
+      expect(client.query).toHaveBeenCalledWith({
+        TableName: 'T',
+        IndexName: 'SomeIndex',
+        KeyConditionExpression: 'id=:key',
+        ExpressionAttributeValues: { ':key': 'someId' },
+        ScanIndexForward: true,
+        Limit: 100
+      }, jasmine.any(Function));
+
+      var items = [{ h: 'hash', r: 234, createdAt: 123, modifiedAt: 123, title: 'Hi', id: 'someId' }];
+      invokeCallback(client.query, null, { Items: items });
+      expect(err).toBeNull();
+      expect(result).toEqual(items);
+    });
+    
+    it('empty result', function() {
+      db.table('T').listByIndex({Key: {id: 'someId'}, IndexName: 'SomeIndex'}, capture);
+      invokeCallback(client.query, null, { Items: [] });
+      expect(err).toBeNull();
+      expect(result).toEqual([]);
+    });
+    
+    it('error from dynamodb', function() {
+      db.table('T').listByIndex({Key: {id: 'someId'}, IndexName: 'SomeIndex'}, capture);
+      client.query.calls.argsFor(0)[1](new Error('Fail'));
+      expect(err.message).toBe('Fail');
+    });
+  });
 
   describe('#get', function() {
     it('existing item', function() {
