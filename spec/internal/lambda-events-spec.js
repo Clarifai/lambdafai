@@ -183,7 +183,7 @@ var SCHEDULED_EVENT = {
 
 var API_GATEWAY_AUTHORIZER_EVENT = {
   "authorizationToken": "Bearer foo",
-  "methodArn": "arn:aws:execute-api:us-east-1:282244745782:1tsgzwz575/dev/GET/auth",
+  "methodArn": "arn:aws:execute-api:us-east-1:123456789012/dev/GET/auth",
   "type": "TOKEN"
 };
 
@@ -312,8 +312,14 @@ describe('LambdaEvents#standardizeEvent', function() {
       method: 'APIGATEWAYAUTHORIZEREVENT',
       stage: 'dev',
       path: '/GET/auth',
-      headers: '{Authorization=Bearer foo}',
-      headerNames: '[Authorization]'
+      headers: {
+        Authorization: 'Bearer foo'
+      },
+      body: {
+        authorizationToken: 'Bearer foo',
+        methodArn: 'arn:aws:execute-api:us-east-1:123456789012/dev/GET/auth',
+        type: 'TOKEN' 
+      }
     });
   });
   
